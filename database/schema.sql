@@ -1,5 +1,3 @@
--- USE habittracking;
-
 CREATE TABLE IF NOT EXISTS habit (
    id SERIAL PRIMARY KEY,
    habit_name VARCHAR(50) NOT NULL,
