@@ -1,0 +1,2 @@
+- Single button in the center of the page that says "Log Habit"
+- Writes to database the time that the button was pressed
