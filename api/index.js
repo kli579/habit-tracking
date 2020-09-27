@@ -3,14 +3,9 @@ const bodyParser = require("body-parser")
 const cors = require("cors")
 const { Pool } = require('pg')
 
-// Express app
-const app = express()
-
-// Enable cors
-app.use(cors())
-
-// Use bodyparser
-app.use(bodyParser.json())
+const app = express() // Express app
+app.use(cors()) // Enable cors
+app.use(bodyParser.json()) // Use bodyparser
 
 // Create postgres pool
 const pool = new Pool({
@@ -21,72 +16,50 @@ const pool = new Pool({
   port: 5432,
 });
 
+// Provide the database client to all requests
+app.use(wrapAsync(async (req, res, next) => {
+  req.client = await pool.connect();
+  next();
+}));
+
 // Endpoints
-app.post("/track-habit", (req, parent_res) => {
-  pool
-    .connect()
-    .then(client => {
-      return client
-        .query(`INSERT INTO occurence (habit_id) VALUES (${req.body.habit_id}) RETURNING id`)
-        .then(res => {
-          parent_res.send(res.rows)
-        })
-        .catch(err => {
-          parent_res.status(500)
-        })
-        .finally(() => {
-          client.release()
-        })
+app.post("/habits", (req, parent_res) => {
+  req.client
+    .query(`INSERT INTO occurence (habit_id) VALUES (${req.body.habit_id}) RETURNING id`)
+    .then(res => {
+      parent_res.send(res.rows)
     })
-    .catch(err => {
-      console.log("Breaking in connect bs - track-habit")
-      parent_res.status(500)
-    })
+    .finally(req.client.release);
 });
 
-app.get("/get-habits", (req, parent_res) => {
-  pool
-    .connect()
-    .then(client => {
-      return client
-        .query("SELECT * FROM habit")
-        .then(res => {
-          parent_res.send(res.rows)
-        })
-        .catch(err => {
-          parent_res.status(500)
-        })
-        .finally(() => {
-          client.release()
-        })
+app.get("/habits", (req, parent_res) => {
+  req.client
+    .query("SELECT * FROM habit")
+    .then(res => {
+      parent_res.send(res.rows)
     })
-    .catch(err => {
-      console.log("Breaking in connect bs - get-habits")
-      parent_res.status(500)
-    })
+    .finally(req.client.release);
 });
 
-app.get("/habit/:habitId", wrapAsync(async (req, res) => {
-  const client = await pool.connect();
-
+app.get("/habits/:habitId", wrapAsync(async (req, res) => {
   const getHabits = async () => {
     const { habitId } = req.params;
-    const habits = await client.query(`
+    // TODO: look into how to properly format this query string
+    const habits = await req.client.query(`
       SELECT created_at FROM occurence
       WHERE occurence.habit_id = ${habitId}
     `);
-    res.send(habits.rows);
+    const creationTimes = habits.rows.map(({ created_at }) => created_at);
+    res.send({ habit_id: habitId, creation_times: creationTimes });
   }
 
-  await getHabits().finally(() => {
-    client.release();
-  })
+  await getHabits().finally(req.client.release);
 }))
 
 // Basic error handler
 app.use((err, req, res, next) => {
   console.error(err.stack)
-  res.status(500).send('Internal Server Error')
+  res.status(500).send("Internal Server Error")
 })
 
 app.listen(3001, () => {
