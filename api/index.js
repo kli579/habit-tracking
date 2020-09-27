@@ -37,11 +37,11 @@ app.post("/track-habit", (req, parent_res) => {
         .finally(() => {
           client.release()
         })
-      })
-      .catch(err => {
-        console.log("Breaking in connect bs - track-habit")
-        parent_res.status(500)
-      })
+    })
+    .catch(err => {
+      console.log("Breaking in connect bs - track-habit")
+      parent_res.status(500)
+    })
 });
 
 app.get("/get-habits", (req, parent_res) => {
@@ -49,7 +49,7 @@ app.get("/get-habits", (req, parent_res) => {
     .connect()
     .then(client => {
       return client
-        .query(`SELECT * FROM habit`)
+        .query("SELECT * FROM habit")
         .then(res => {
           parent_res.send(res.rows)
         })
@@ -66,6 +66,37 @@ app.get("/get-habits", (req, parent_res) => {
     })
 });
 
-app.listen(3001, ()=> {
+app.get("/habit/:habitId", wrapAsync(async (req, res) => {
+  const client = await pool.connect();
+
+  const getHabits = async () => {
+    const { habitId } = req.params;
+    const habits = await client.query(`
+      SELECT created_at FROM occurence
+      WHERE occurence.habit_id = ${habitId}
+    `);
+    res.send(habits.rows);
+  }
+
+  await getHabits().finally(() => {
+    client.release();
+  })
+}))
+
+// Basic error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack)
+  res.status(500).send('Internal Server Error')
+})
+
+app.listen(3001, () => {
   console.log("Listening on port 3001")
 });
+
+function wrapAsync(fn) {
+  return function (req, res, next) {
+    // Make sure to `.catch()` any errors and pass them along to the `next()`
+    // middleware in the chain, in this case the error handler.
+    fn(req, res, next).catch(next);
+  };
+}
