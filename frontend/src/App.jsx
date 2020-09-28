@@ -13,6 +13,8 @@ import {
 } from '@material-ui/core/styles';
 
 import './App.css';
+import TrackButton  from './TrackButton'
+import HabitGraph from './HabitGraph'
 import axios from 'axios';
 
 const darkTheme = createMuiTheme({
@@ -37,81 +39,14 @@ const styles = (theme) => ({
 });
 
 class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { habits: [], selected_habit_id: '' };
-
-    this.trackHabit = this.trackHabit.bind(this);
-    this.getHabits = this.getHabits.bind(this);
-    this.updateSelectedHabit = this.updateSelectedHabit.bind(this);
-  }
-
-  componentDidMount() {
-    this.getHabits();
-  }
-
-  getHabits() {
-    axios
-      .get(`http://localhost:3001/get-habits`)
-      .then((res) => {
-        this.setState({ habits: res.data });
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
-
-  updateSelectedHabit(event) {
-    this.setState({ selected_habit_id: event.target.value });
-  }
-
-  trackHabit() {
-    const { selected_habit_id } = this.state;
-    axios
-      .post(`http://localhost:3001/track-habit`, {
-        habit_id: selected_habit_id,
-      })
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
-
   render() {
     const { classes } = this.props;
 
     return (
-      <ThemeProvider theme={darkTheme}>
-        <div className="App">
-          <FormControl variant="outlined" className={classes.formControl}>
-            <InputLabel id="habit-select-menu-id">Habit</InputLabel>
-            <Select
-              id="habit-select-menu"
-              labelId="habit-select-menu-id"
-              onChange={this.updateSelectedHabit}
-              value={this.state.selected_habit_id}
-            >
-              {this.state.habits.map((habit, index) => (
-                <MenuItem key={index} value={habit.id}>
-                  {habit.habit_name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <div className={classes.root}>
-            <Button
-              style={{ fontSize: '24px', fontWeight: '700' }}
-              color="secondary"
-              variant="contained"
-              onClick={this.trackHabit}
-            >
-              TRACK
-            </Button>
-          </div>
-        </div>
-      </ThemeProvider>
+      <div className="App">
+        {/* <HabitGraph></HabitGraph> */}
+        <TrackButton/>
+      </div>
     );
   }
 }

@@ -1,0 +1,36 @@
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;600;700&display=swap");
+
+.track-button{
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* .Button {
+  font-size: 20px;
+  font-family: "Open Sans";
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #fff;
+  text-transform: uppercase;
+  text-decoration: none;
+  background: #ed3330;
+  padding: 20px;
+  border: 4px solid #494949;
+  display: inline-block;
+  transition: all 0.4s ease 0s;
+}
+
+.Button:hover {
+  color: #ffffff;
+  background: #32a6a8;
+  border-color: #32a6a8;
+  transition: all 0.4s ease 0s;
+}
+
+.Button:focus {
+  outline: none;
+}
+
+.Button:active {
+  background: black;
+} */
