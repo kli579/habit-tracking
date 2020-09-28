@@ -1,7 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;600;700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;600;700&display=swap');
 
 body {
-  font-family: "Open Sans";
+  font-family: 'Open Sans';
 }
 
 .App {
@@ -43,7 +43,7 @@ body {
   }
 }
 
-.track-button{
+.track-button {
   font-size: 24px;
   font-weight: 700;
 }
