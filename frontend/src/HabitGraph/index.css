@@ -1,4 +1,15 @@
-.Demo {
+.DemoBody{
     width: 1000px;
     padding: 20px 20px 20px 20px;
+}
+
+.DemoContainer{
+    padding-top: 20px;
+    overflow-y: hidden;
+    overflow-x: scroll;
+}
+
+.Demo {
+    min-width: 2000px;
+    min-height: 400px;
 }

@@ -44,7 +44,7 @@ class App extends React.Component {
 
     return (
       <div className="App">
-        {/* <HabitGraph></HabitGraph> */}
+        <HabitGraph/>
         <TrackButton/>
       </div>
     );
