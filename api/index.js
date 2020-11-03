@@ -9,11 +9,11 @@ app.use(bodyParser.json()); // Use bodyparser
 
 // Create postgres pool
 const pool = new Pool({
-  user: "habittracking",
-  host: "192.168.1.180",
-  database: "habittracking",
-  password: "*tW81wEA6694",
-  port: 5432,
+  user: process.env.POSTGRES_USER,
+  host: process.env.HOST_ADDR,
+  database: process.env.POSTGRES_DATABASE,
+  password: process.env.POSTGRES_PASSWORD,
+  port: process.env.PGPORT,
 });
 
 // Provide the database client to all requests
@@ -25,20 +25,33 @@ app.use(
 );
 
 // Endpoints
-app.post("/habits", (req, parent_res) => {
+app.post("/habits", wrapAsync(async (req, res) => {
+  const postHabits = async () => {
+    const { habitName } = req.query;
+    const query = `INSERT INTO habit (habit_name) VALUES ('${habitName}') RETURNING id`;
+    const habit = await req.client.query(query);
+    const id = habit.rows[0].id;
+    res.send({ id });
+  }
+
+  await postHabits().finally(req.client.release);
+}));
+
+app.get("/habits", (req, parent_res) => {
   req.client
-    .query(
-      `INSERT INTO occurence (habit_id) VALUES (${req.body.habit_id}) RETURNING id`
-    )
+    .query("SELECT * FROM habit")
     .then((res) => {
       parent_res.send(res.rows);
     })
     .finally(req.client.release);
 });
 
-app.get("/habits", (req, parent_res) => {
+app.post("/habits/:habitId", (req, parent_res) => {
+  const { habitId } = req.params;
   req.client
-    .query("SELECT * FROM habit")
+    .query(
+      `INSERT INTO occurence (habit_id) VALUES (${habitId}) RETURNING id`
+    )
     .then((res) => {
       parent_res.send(res.rows);
     })
